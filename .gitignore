@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Docker
+.env
+.env.local
+
+# Logs
+logs/
+*.log
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
