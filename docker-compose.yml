@@ -56,8 +56,8 @@ services:
   # Auth Service
   auth-service:
     build:
-      context: ../frameforge-auth-service
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: frameforge-auth-service/Dockerfile
     container_name: frameforge-auth-service
     ports:
       - "3001:3001"
@@ -83,8 +83,8 @@ services:
   # API Gateway
   api-gateway:
     build:
-      context: ../frameforge-api-gateway
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: frameforge-api-gateway/Dockerfile
     container_name: frameforge-api-gateway
     ports:
       - "3000:3000"
@@ -117,8 +117,8 @@ services:
   # Video Processor
   video-processor:
     build:
-      context: ../frameforge-video-processor
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: frameforge-video-processor/Dockerfile
     container_name: frameforge-video-processor
     environment:
       DATABASE_URL: postgresql://frameforge:frameforge123@postgres:5432/frameforge
@@ -141,8 +141,8 @@ services:
   # Notification Service
   notification-service:
     build:
-      context: ../frameforge-notification-service
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: frameforge-notification-service/Dockerfile
     container_name: frameforge-notification-service
     environment:
       DATABASE_URL: postgresql://frameforge:frameforge123@postgres:5432/frameforge
