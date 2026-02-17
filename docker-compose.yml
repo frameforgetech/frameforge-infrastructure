@@ -149,7 +149,7 @@ services:
       RABBITMQ_URL: amqp://frameforge:frameforge123@rabbitmq:5672
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
-      SMTP_SECURE: false
+      SMTP_SECURE: "false"
       FROM_EMAIL: noreply@frameforge.com
       FROM_NAME: FrameForge
       MAX_RETRIES: 3
@@ -198,7 +198,7 @@ services:
       - "3002:3000"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
-      GF_USERS_ALLOW_SIGN_UP: false
+      GF_USERS_ALLOW_SIGN_UP: "false"
     volumes:
       - grafana-data:/var/lib/grafana
     depends_on:
