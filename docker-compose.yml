@@ -104,6 +104,11 @@ services:
       DB_NAME: frameforge
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://frameforge:frameforge123@rabbitmq:5672
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: us-east-1
+      S3_VIDEOS_BUCKET: ${S3_VIDEOS_BUCKET}
+      S3_RESULTS_BUCKET: ${S3_RESULTS_BUCKET}
       NODE_ENV: development
     depends_on:
       postgres:
@@ -132,7 +137,17 @@ services:
     container_name: frameforge-video-processor
     environment:
       DATABASE_URL: postgresql://frameforge:frameforge123@postgres:5432/frameforge
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: frameforge
+      DB_PASSWORD: frameforge123
+      DB_NAME: frameforge
       RABBITMQ_URL: amqp://frameforge:frameforge123@rabbitmq:5672
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: us-east-1
+      S3_VIDEOS_BUCKET: ${S3_VIDEOS_BUCKET}
+      S3_RESULTS_BUCKET: ${S3_RESULTS_BUCKET}
       TEMP_DIR: /tmp/frameforge
       FPS: 1
       MAX_CONCURRENT_JOBS: 5
@@ -142,6 +157,12 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3002/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     volumes:
       - video-temp:/tmp/frameforge
     networks:
@@ -156,6 +177,11 @@ services:
     container_name: frameforge-notification-service
     environment:
       DATABASE_URL: postgresql://frameforge:frameforge123@postgres:5432/frameforge
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: frameforge
+      DB_PASSWORD: frameforge123
+      DB_NAME: frameforge
       RABBITMQ_URL: amqp://frameforge:frameforge123@rabbitmq:5672
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
@@ -164,6 +190,9 @@ services:
       FROM_NAME: FrameForge
       MAX_RETRIES: 3
       NODE_ENV: development
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
     depends_on:
       postgres:
         condition: service_healthy
@@ -171,6 +200,12 @@ services:
         condition: service_healthy
       mailhog:
         condition: service_started
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3003/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - frameforge-network
     restart: unless-stopped
@@ -209,8 +244,10 @@ services:
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
       GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_INSTALL_PLUGINS: ""
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
     depends_on:
       - prometheus
     networks:
@@ -221,6 +258,7 @@ volumes:
   prometheus-data:
   grafana-data:
   video-temp:
+  minio-data:
 
 networks:
   frameforge-network:

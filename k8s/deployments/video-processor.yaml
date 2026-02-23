@@ -1,0 +1,175 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video-processor
+  namespace: frameforge
+  labels:
+    app: video-processor
+    component: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: video-processor
+  template:
+    metadata:
+      labels:
+        app: video-processor
+        component: worker
+    spec:
+      serviceAccountName: frameforge-sa
+      containers:
+      - name: video-processor
+        image: 458586357331.dkr.ecr.us-east-1.amazonaws.com/frameforge-video-processor:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 3002
+          protocol: TCP
+        - name: metrics
+          containerPort: 9091
+          protocol: TCP
+        env:
+        # Port
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: frameforge-config
+              key: VIDEO_PROCESSOR_PORT
+        
+        # Node environment
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: frameforge-config
+              key: NODE_ENV
+        
+        # Database connection
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: frameforge-secrets
+              key: db-host
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: frameforge-config
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: frameforge-config
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: frameforge-secrets
+              key: db-user
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: frameforge-secrets
+              key: db-password
+        - name: DB_SSL
+          valueFrom:
+            configMapKeyRef:
+              name: frameforge-config
+              key: DB_SSL
+        
+        # RabbitMQ connection
+        - name: RABBITMQ_HOST
+          valueFrom:
+            secretKeyRef:
+              name: frameforge-secrets
+              key: rabbitmq-host
+        - name: RABBITMQ_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: frameforge-config
+              key: RABBITMQ_PORT
+        - name: RABBITMQ_USER
+          valueFrom:
+            secretKeyRef:
+              name: frameforge-secrets
+              key: rabbitmq-user
+        - name: RABBITMQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: frameforge-secrets
+              key: rabbitmq-password
+        - name: RABBITMQ_QUEUE
+          valueFrom:
+            configMapKeyRef:
+              name: frameforge-config
+              key: RABBITMQ_QUEUE_VIDEO
+        - name: RABBITMQ_NOTIFICATION_QUEUE
+          valueFrom:
+            configMapKeyRef:
+              name: frameforge-config
+              key: RABBITMQ_QUEUE_NOTIFICATION
+        # Full RabbitMQ URL (video-processor uses RABBITMQ_URL)
+        - name: RABBITMQ_URL
+          valueFrom:
+            secretKeyRef:
+              name: frameforge-secrets
+              key: rabbitmq-url
+        
+        # S3 configuration
+        - name: AWS_REGION
+          valueFrom:
+            secretKeyRef:
+              name: frameforge-secrets
+              key: aws-region
+        - name: S3_VIDEOS_BUCKET
+          valueFrom:
+            secretKeyRef:
+              name: frameforge-secrets
+              key: s3-videos-bucket
+        - name: S3_RESULTS_BUCKET
+          valueFrom:
+            secretKeyRef:
+              name: frameforge-secrets
+              key: s3-results-bucket
+        
+        # Processing settings
+        - name: MAX_VIDEO_SIZE_MB
+          valueFrom:
+            configMapKeyRef:
+              name: frameforge-config
+              key: MAX_VIDEO_SIZE_MB
+        - name: VIDEO_PROCESSING_TIMEOUT
+          valueFrom:
+            configMapKeyRef:
+              name: frameforge-config
+              key: VIDEO_PROCESSING_TIMEOUT
+        - name: FRAMES_PER_SECOND
+          valueFrom:
+            configMapKeyRef:
+              name: frameforge-config
+              key: FRAMES_PER_SECOND
+        
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3

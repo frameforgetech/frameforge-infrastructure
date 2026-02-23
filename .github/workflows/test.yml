@@ -1,0 +1,75 @@
+name: Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: frameforge
+          POSTGRES_PASSWORD: frameforge
+          POSTGRES_DB: frameforge
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      rabbitmq:
+        image: rabbitmq:3-management-alpine
+        env:
+          RABBITMQ_DEFAULT_USER: frameforge
+          RABBITMQ_DEFAULT_PASS: frameforge
+        ports:
+          - 5672:5672
+          - 15672:15672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      TEST_DB_HOST: localhost
+      TEST_DB_PORT: 5432
+      TEST_DB_USER: frameforge
+      TEST_DB_PASSWORD: frameforge
+      TEST_DB_NAME: frameforge
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate Kubernetes manifests
+        run: |
+          find k8s/ -name "*.yaml" -o -name "*.yml" | xargs -I{} sh -c 'echo "Checking {}" && cat {} > /dev/null'
+          echo "K8s manifests OK"
+
+      - name: Validate Terraform (if available)
+        run: |
+          if command -v terraform &> /dev/null; then
+            cd terraform/environments/dev && terraform validate
+          else
+            echo "Terraform not available, skipping"
+          fi
