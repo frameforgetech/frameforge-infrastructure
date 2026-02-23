@@ -17,6 +17,16 @@ scrape_configs:
       - targets: ['api-gateway:3000']
     metrics_path: '/metrics'
 
+  - job_name: 'video-processor'
+    static_configs:
+      - targets: ['video-processor:9091']
+    metrics_path: '/metrics'
+
+  - job_name: 'notification-service'
+    static_configs:
+      - targets: ['notification-service:9092']
+    metrics_path: '/metrics'
+
   - job_name: 'postgres'
     static_configs:
       - targets: ['postgres:5432']

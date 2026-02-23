@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frameforge-config
+  namespace: frameforge
+data:
+  # Application settings
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  
+  # Port configurations
+  AUTH_SERVICE_PORT: "3001"
+  API_GATEWAY_PORT: "3000"
+  VIDEO_PROCESSOR_PORT: "3002"
+  NOTIFICATION_SERVICE_PORT: "3003"
+  
+  # Service endpoints (internal DNS)
+  AUTH_SERVICE_URL: "http://auth-service:3001"
+  API_GATEWAY_URL: "http://api-gateway:3000"
+  
+  # RabbitMQ settings
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_VHOST: "/"
+  RABBITMQ_QUEUE_VIDEO: "video_processing"
+  RABBITMQ_QUEUE_NOTIFICATION: "notifications"
+  RABBITMQ_EXCHANGE: "frameforge"
+  
+  # Redis settings
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  
+  # Database settings
+  DB_PORT: "5432"
+  DB_NAME: "frameforge"
+  DB_SSL: "true"
+  
+  # S3 settings
+  AWS_REGION: "us-east-1"
+  S3_VIDEOS_BUCKET: "tharlysdias-frameforge-videos-dev"
+  S3_RESULTS_BUCKET: "tharlysdias-frameforge-results-dev"
+  
+  # Processing settings
+  MAX_VIDEO_SIZE_MB: "100"
+  VIDEO_PROCESSING_TIMEOUT: "300"
+  FRAMES_PER_SECOND: "1"
+  
+  # Email settings (MailHog for dev, AWS SES for production)
+  MAILHOG_HOST: "mailhog"
+  MAILHOG_PORT: "1025"
+  SES_FROM_EMAIL: "noreply@frameforge.com"

@@ -1,48 +1,39 @@
 # FrameForge Infrastructure
 
-Infrastructure as Code and orchestration for the FrameForge microservices platform.
+Infraestrutura compartilhada, orquestração e documentação para a plataforma de microsserviços FrameForge.
 
-## 🚀 Quick Start
+## 📁 Estrutura
 
-### Prerequisites
-
-- Docker & Docker Compose
-- Git
-- Node.js 20+ (for local development)
-
-### Local Development Setup
-
-```bash
-# Clone all repositories (if needed)
-cd /path/to/projects
-
-# Run setup script
-cd frameforge-infrastructure
-chmod +x scripts/*.sh
-./scripts/setup-local.sh
 ```
-
-This will:
-1. ✅ Check all service directories exist
-2. 📦 Install npm dependencies
-3. 🏗️ Build all services
-4. 🐳 Start Docker Compose stack
-
-### Manual Setup
-
-```bash
-# Start all services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-
-# Rebuild everything
-docker-compose build --no-cache
-docker-compose up -d
+frameforge-infrastructure/
+├── docker-compose.yml          # Stack completo para desenvolvimento local
+├── init-db.sh                  # Script de inicialização do banco
+├── .github/                    # Workflows de CI/CD
+│   └── workflows/
+├── docs/                       # 📚 Documentação completa do projeto
+│   ├── ARCHITECTURE_DECISION.md
+│   ├── ARCHITECTURE_DIAGRAM.md
+│   ├── TECHNICAL_DECISIONS.md
+│   ├── IMPLEMENTATION_STRATEGY.md
+│   ├── REPOSITORY_STRATEGY.md
+│   ├── RESUMO_EXECUTIVO.md
+│   └── DOCUMENTATION_INDEX.md
+├── monitoring/                 # Configuração Prometheus/Grafana
+│   └── prometheus.yml
+├── docker/                     # Dockerfiles base compartilhados
+│   ├── base.Dockerfile
+│   └── processor-base.Dockerfile
+├── terraform/                  # Infrastructure as Code (TODO)
+│   ├── modules/
+│   ├── environments/
+│   └── README.md
+├── k8s/                        # Kubernetes manifests (TODO)
+│   ├── base/
+│   ├── overlays/
+│   └── README.md
+└── scripts/                    # Scripts de automação
+    ├── setup-local.sh
+    └── init-db.sh
 ```
 
 ## 📊 Service Access
